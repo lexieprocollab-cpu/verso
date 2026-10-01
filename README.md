@@ -67,4 +67,4 @@ The trial is checked in the app today. Once songs live in the database (step 6),
 
 ## Deploy (Vercel)
 
-This folder lives inside the Lexi repository for now. Create a Vercel project from the repo with **Root Directory** set to `verso`, and add the environment variables listed in `.env.example`. The tennis site at the repo root is unaffected.
+Create a Vercel project from this repository (Root Directory: the repo root, framework: Next.js) and add the environment variables listed in `.env.example`.
