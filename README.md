@@ -43,7 +43,7 @@ Checks: `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`, and `.
 
 ## Connect the services
 
-1. **Supabase** — create a project at supabase.com. Copy the *Project URL* and *anon public key* (Settings → API) into `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Run the SQL in `supabase/migrations/` (SQL editor, or `supabase db push`). Under Authentication → URL Configuration, add your site URL and `<site>/settings` as a redirect URL.
+1. **Supabase** — create a project at supabase.com. Copy the *Project URL* and *anon public key* (Settings → API) into `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Run the SQL in `supabase/migrations/` (SQL editor, or `supabase db push`); on a fresh project you can paste `supabase/setup.sql`, which is all of them in one script. Under Authentication → URL Configuration, add your site URL and `<site>/settings` as a redirect URL.
 2. **Claude API** — create a key at console.anthropic.com and set `ANTHROPIC_API_KEY` (server only, never sent to the browser). AI features use Claude Opus 5.5 with structured outputs and server-side safety fallbacks. Without the key, AI buttons say "AI isn't connected yet" and everything else keeps working.
 
 3. **Stripe** (payments) — create a monthly subscription price, then set `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` (and optionally `STRIPE_PRICE_ID_YEARLY` and `STRIPE_PRICE_ID_FAMILY` to offer those plans), and `SUPABASE_SERVICE_ROLE_KEY` (server only). Add a webhook endpoint `https://<site>/api/billing/webhook` for `checkout.session.completed` and `customer.subscription.created/updated/deleted`, and set its signing secret as `STRIPE_WEBHOOK_SECRET`. Turn on the customer portal in Stripe's settings.
