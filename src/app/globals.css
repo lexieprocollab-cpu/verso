@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+/* Theme follows data-theme on <html>: "light", "dark", or absent = system. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  --bg: #fbf8f4;
+  --surface: #ffffff;
+  --text: #1c1a24;
+  --muted: #6b6878;
+  --border: #e7e2da;
+  --accent: #6d4aff;
+  --accent-soft: #ece6ff;
+  --chart: #6d4aff; /* single-series chart marks (validated vs the surface) */
+  --grid: #eeeae3;
+  --lyric: #1c1a24;
+  --translation: #6b6878;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121118;
+    --surface: #1b1a23;
+    --text: #f2f0f7;
+    --muted: #a19eb0;
+    --border: #2d2b38;
+    --accent: #9b82ff;
+    --accent-soft: #2a2442;
+    --chart: #8f73ff;
+    --grid: #2a2833;
+    --lyric: #f2f0f7;
+    --translation: #a19eb0;
+  }
+}
+
+:root[data-theme="dark"] {
+  --chart: #8f73ff;
+  --grid: #2a2833;
+  --bg: #121118;
+  --surface: #1b1a23;
+  --text: #f2f0f7;
+  --muted: #a19eb0;
+  --border: #2d2b38;
+  --accent: #9b82ff;
+  --accent-soft: #2a2442;
+  --lyric: #f2f0f7;
+  --translation: #a19eb0;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --font-sans: "Inter", "Segoe UI", "Noto Sans", "Noto Sans Hebrew", "Arial Hebrew", system-ui, sans-serif;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Listening party reactions rise over the running line. */
+@keyframes party-float {
+  from {
+    transform: translateY(0) scale(0.8);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-140px) scale(1.2);
+    opacity: 0;
+  }
+}
+.party-float {
+  animation: party-float 2.5s ease-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .party-float {
+    animation-duration: 0.01s;
+  }
+}

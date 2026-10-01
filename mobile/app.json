@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Verso",
+    "slug": "verso",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.verso.app"
+    },
+    "android": {
+      "package": "com.verso.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#6d4aff",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "output": "single"
+    },
+    "scheme": "verso",
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "tsconfigPaths": true
+    }
+  }
+}
