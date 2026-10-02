@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-/** Contact address for privacy and legal questions; set NEXT_PUBLIC_CONTACT_EMAIL in Vercel. */
-export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "";
+/** Contact address for privacy and legal questions; NEXT_PUBLIC_CONTACT_EMAIL in Vercel overrides it. */
+export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "lexieprocollab@gmail.com";
 
 export const LEGAL_UPDATED = "2 October 2026";
 
