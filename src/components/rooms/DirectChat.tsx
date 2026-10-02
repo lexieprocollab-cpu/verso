@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { callAi } from "@/lib/ai/client";
-import { LANGUAGE_NAMES, format } from "@/lib/i18n";
+import { LANGUAGE_NAMES, format, aiFailureText } from "@/lib/i18n";
 import type { DirectMessage, OwnProfile, RoomsBackend } from "@/lib/rooms/backend";
 import { checkMessage } from "@/lib/rooms/rules";
 import { usePreferences } from "../Preferences";
@@ -57,7 +57,7 @@ function DirectChat({ rooms, me, otherId }: { rooms: RoomsBackend; me: OwnProfil
     const outcome = await callAi("translate", { lines: [message.body], learn: from, target: lang });
     setTranslations((all) => ({
       ...all,
-      [message.id]: outcome.ok ? (outcome.data.translations[0] ?? "") : outcome.reason === "not_configured" ? t.ai.unavailable : t.ai.failed,
+      [message.id]: outcome.ok ? (outcome.data.translations[0] ?? "") : aiFailureText(t, outcome.reason),
     }));
   }
 

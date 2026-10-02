@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LANGUAGE_NAMES, UI_LANGUAGES, directionOf, type UiLanguage } from "@/lib/i18n";
@@ -141,6 +142,14 @@ export function Welcome() {
           {t.onboarding.skip}
         </button>
       )}
+      <p className="mt-8 flex justify-center gap-4 text-xs text-muted">
+        <Link href="/privacy" className="underline">
+          {t.account.privacy}
+        </Link>
+        <Link href="/terms" className="underline">
+          {t.account.terms}
+        </Link>
+      </p>
     </section>
   );
 }

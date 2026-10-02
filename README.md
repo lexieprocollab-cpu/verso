@@ -57,13 +57,17 @@ Settings in the app shows whether each service is connected.
 
 The trial is checked in the app today. Once songs live in the database (step 6), serve lyrics only through `public.can_play_song`, which enforces the same 3-song rule on the server.
 
+### Account deletion and legal pages
+
+`POST /api/account/delete` (Bearer token) deletes the Stripe customer (cancelling any web subscription), the learner's uploaded songs and audio, then the auth user; every user table cascades. Settings on web and mobile has the Delete account button (App Store guideline 5.1.1(v)). `/privacy` and `/terms` are linked from Welcome and Settings; set `NEXT_PUBLIC_CONTACT_EMAIL` for the contact line.
+
 ### Rooms endpoint
 
 `POST /api/rooms/{send|report|vote|resolve}` and `GET /api/rooms/queue` (moderators), with `Authorization: Bearer <access token>`. The server checks the profile, age, bans, the profanity filter, song-words-only mode and a burst limit before writing; learners read messages directly under row-level security, which hides reported messages and people they blocked.
 
 ### AI endpoint
 
-`POST /api/ai/{task}` with `task` = `word`, `phrase`, `explain`, `quiz`, `check`, `sentence` or `translate`. Inputs are validated with zod (`src/lib/ai/schemas.ts`), cross-site calls are refused, and answers are cached per server instance. Before a public launch, add per-user rate limits (after sign-in) and move the cache to the `glossary` / `quizzes` tables.
+`POST /api/ai/{task}` with `task` = `word`, `phrase`, `explain`, `quiz`, `check`, `sentence` or `translate`. Inputs are validated with zod (`src/lib/ai/schemas.ts`), cross-site calls are refused, and answers are cached per server instance. Each learner (or guest address, stored only as a salted hash) gets a daily cap, counted in `ai_usage` by `take_ai_request` (`AI_DAILY_LIMIT_USER`, default 150; `AI_DAILY_LIMIT_GUEST`, default 40); over the cap the endpoint answers 429. Before a public launch, move the cache to the `glossary` / `quizzes` tables.
 
 ## Deploy (Vercel)
 

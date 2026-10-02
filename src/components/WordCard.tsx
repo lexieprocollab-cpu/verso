@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { directionOf, type UiLanguage } from "@/lib/i18n";
 import { isSaved, knownWordsStore, savedWordsStore, speak, toggleKnown, toggleWord, wordId } from "@/lib/learnerStores";
 import { findPhrases, lookupGloss, wordsBetween, type Song } from "@/lib/song";
@@ -18,6 +18,7 @@ export function WordCard({
   meaningLang,
   onClose,
   onSelect,
+  overVideo = false,
 }: {
   song: Song;
   selection: WordSelection;
@@ -25,6 +26,11 @@ export function WordCard({
   onClose: () => void;
   /** Opens another word or phrase in the same card (e.g. "Part of the phrase"). */
   onSelect?: (next: WordSelection) => void;
+  /**
+   * The song plays in an embedded YouTube player, which nothing may cover or
+   * dim (YouTube API policy): the card docks at the bottom without a backdrop.
+   */
+  overVideo?: boolean;
 }) {
   const { t } = usePreferences();
   const isPhrase = selection.key.includes(" ");
@@ -61,6 +67,17 @@ export function WordCard({
     else void runWord({ ...input, word: selection.word });
   }, [meaning, meaningLang, isPhrase, runPhrase, runWord, selection.word, line?.text, song.language]);
 
+  // Without a backdrop to tap, a tap anywhere outside the card closes it.
+  const sheetRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!overVideo) return;
+    const onDown = (e: PointerEvent) => {
+      if (!sheetRef.current?.contains(e.target as Node)) onClose();
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [overVideo, onClose]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -73,13 +90,21 @@ export function WordCard({
   const learnDir = directionOf(song.language);
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/30" onClick={onClose}>
+    <div
+      className={
+        overVideo
+          ? "pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center"
+          : "fixed inset-0 z-40 flex items-end justify-center bg-black/30"
+      }
+      onClick={overVideo ? undefined : onClose}
+    >
       <div
+        ref={sheetRef}
         role="dialog"
-        aria-modal="true"
+        aria-modal={!overVideo}
         aria-label={selection.word}
         onClick={(e) => e.stopPropagation()}
-        className="max-h-[85dvh] w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-border bg-surface p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-xl"
+        className={`${overVideo ? "pointer-events-auto max-h-[50dvh]" : "max-h-[85dvh]"} w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-border bg-surface p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-xl`}
       >
         <div className="flex items-start justify-between gap-4">
           <div dir={learnDir} className="min-w-0">

@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { AiNotice } from "../components/AiNotice";
 import { Body, Button, Chip, Field, Row, Screen } from "../components/ui";
-import { callAi } from "../lib/ai";
+import { callAi, type AiFailure } from "../lib/ai";
 import { recordActivity, savedWordsStore } from "../lib/learner";
 import { useSongs } from "../lib/songs";
 import { usePreferences } from "../lib/usePreferences";
@@ -26,7 +26,7 @@ export default function Tutor() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<"not_configured" | "declined" | "failed" | null>(null);
+  const [error, setError] = useState<AiFailure | null>(null);
   const [shown, setShown] = useState<ReadonlySet<number>>(new Set());
   const rtl = directionOf(song.language) === "rtl";
 

@@ -74,6 +74,15 @@ export type Dictionary = {
     signOut: string;
     unavailable: string;
     error: string;
+    deleteAccount: string;
+    deleteWarning: string;
+    deleteConfirm: string;
+    cancel: string;
+    deleted: string;
+    deleteFailed: string;
+    storeReminder: string;
+    privacy: string;
+    terms: string;
   };
   catalog: { songs: string; beginner: string; demo: string; notFound: string; mine: string; addSong: string };
   player: {
@@ -120,7 +129,7 @@ export type Dictionary = {
     again: string;
     backToSong: string;
   };
-  ai: { ask: string; loading: string; unavailable: string; failed: string; declined: string; explainLine: string; meaning: string; culture: string; root: string; newQuiz: string; generating: string; easy: string; medium: string; hard: string };
+  ai: { ask: string; loading: string; unavailable: string; failed: string; declined: string; limit: string; explainLine: string; meaning: string; culture: string; root: string; newQuiz: string; generating: string; easy: string; medium: string; hard: string };
   more: { knowIt: string; known: string; understood: string; streak: string };
   practice: { review: string; reviewDue: string; reviewNone: string; quiz: string; sentence: string; show: string; again: string; hard: string; good: string; easy: string; reviewDone: string };
   sentence: { title: string; hint: string; placeholder: string; check: string; makeOne: string; reveal: string; correct: string; fixed: string };
@@ -146,6 +155,14 @@ export type Dictionary = {
     notConfigured: string;
   };
 };
+
+/** The line shown when an AI request gave no answer. */
+export function aiFailureText(t: Dictionary, reason: "not_configured" | "declined" | "limit" | "failed"): string {
+  if (reason === "not_configured") return t.ai.unavailable;
+  if (reason === "declined") return t.ai.declined;
+  if (reason === "limit") return t.ai.limit;
+  return t.ai.failed;
+}
 
 export const dictionaries: Record<UiLanguage, Dictionary> = {
   en: {
@@ -174,10 +191,19 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       signOut: "Sign out",
       unavailable: "Sign-in turns on once the database is connected.",
       error: "Could not send the link. Try again.",
+      deleteAccount: "Delete account",
+      deleteWarning: "This permanently deletes your account: saved words, progress, messages, songs you uploaded and your subscription. It can't be undone.",
+      deleteConfirm: "Delete forever",
+      cancel: "Cancel",
+      deleted: "Your account was deleted.",
+      deleteFailed: "Couldn't delete your account. Try again.",
+      storeReminder: "Your App Store or Google Play subscription isn't cancelled automatically. Cancel it in your phone's settings.",
+      privacy: "Privacy policy",
+      terms: "Terms of use",
     },
     catalog: { songs: "Songs", beginner: "Beginner", demo: "Demo", notFound: "This song isn't on this device.", mine: "Mine", addSong: "Add a song" },
     player: {
-      demoNote: "Demo song: there's no audio yet, so the lyrics run on a timer. Tap any word.",
+      demoNote: "Demo song: there's no recording, so a voice reads each line as it comes up. Tap any word.",
       play: "Play",
       pause: "Pause",
       repeatLine: "Repeat line",
@@ -231,6 +257,7 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       unavailable: "AI isn't connected yet — add the Claude API key.",
       failed: "Couldn't get an answer. Try again.",
       declined: "The AI couldn't answer this one.",
+      limit: "You've used today's AI help. It resets tomorrow.",
       explainLine: "Explain line",
       meaning: "Meaning",
       culture: "Culture",
@@ -570,10 +597,19 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       signOut: "Se déconnecter",
       unavailable: "La connexion s'active une fois la base de données reliée.",
       error: "Impossible d'envoyer le lien. Réessaie.",
+      deleteAccount: "Supprimer le compte",
+      deleteWarning: "Cela supprime définitivement ton compte : mots enregistrés, progrès, messages, chansons envoyées et abonnement. C'est irréversible.",
+      deleteConfirm: "Supprimer définitivement",
+      cancel: "Annuler",
+      deleted: "Ton compte a été supprimé.",
+      deleteFailed: "Impossible de supprimer ton compte. Réessaie.",
+      storeReminder: "Ton abonnement App Store ou Google Play n'est pas annulé automatiquement. Annule-le dans les réglages de ton téléphone.",
+      privacy: "Politique de confidentialité",
+      terms: "Conditions d'utilisation",
     },
     catalog: { songs: "Chansons", beginner: "Débutant", demo: "Démo", notFound: "Cette chanson n'est pas sur cet appareil.", mine: "À moi", addSong: "Ajouter une chanson" },
     player: {
-      demoNote: "Chanson de démo : pas encore d'audio, les paroles défilent avec un minuteur. Touche n'importe quel mot.",
+      demoNote: "Chanson de démo : il n'y a pas d'enregistrement, une voix lit donc chaque ligne. Touche n'importe quel mot.",
       play: "Lecture",
       pause: "Pause",
       repeatLine: "Répéter la ligne",
@@ -627,6 +663,7 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       unavailable: "L'IA n'est pas encore connectée — ajoute la clé de l'API Claude.",
       failed: "Impossible d'obtenir une réponse. Réessaie.",
       declined: "L'IA n'a pas pu répondre à celle-ci.",
+      limit: "Vous avez utilisé l'aide IA d'aujourd'hui. Elle revient demain.",
       explainLine: "Expliquer la ligne",
       meaning: "Sens",
       culture: "Culture",
@@ -966,10 +1003,19 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       signOut: "התנתקות",
       unavailable: "ההתחברות תופעל אחרי חיבור מסד הנתונים.",
       error: "לא הצלחנו לשלוח את הקישור. נסו שוב.",
+      deleteAccount: "מחיקת החשבון",
+      deleteWarning: "פעולה זו מוחקת לצמיתות את החשבון: מילים שמורות, התקדמות, הודעות, שירים שהעלית והמנוי. אי אפשר לבטל אותה.",
+      deleteConfirm: "מחיקה לצמיתות",
+      cancel: "ביטול",
+      deleted: "החשבון שלך נמחק.",
+      deleteFailed: "לא הצלחנו למחוק את החשבון. נסו שוב.",
+      storeReminder: "המנוי ב-App Store או ב-Google Play לא מבוטל אוטומטית. בטלו אותו בהגדרות הטלפון.",
+      privacy: "מדיניות פרטיות",
+      terms: "תנאי שימוש",
     },
     catalog: { songs: "שירים", beginner: "מתחילים", demo: "הדגמה", notFound: "השיר הזה לא נמצא במכשיר הזה.", mine: "שלי", addSong: "הוספת שיר" },
     player: {
-      demoNote: "שיר הדגמה: עדיין אין שמע, אז המילים רצות לפי טיימר. אפשר ללחוץ על כל מילה.",
+      demoNote: "שיר הדגמה: אין הקלטה, אז קול מקריא כל שורה בתורה. הקישו על כל מילה.",
       play: "נגינה",
       pause: "השהיה",
       repeatLine: "חזרה על השורה",
@@ -1023,6 +1069,7 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       unavailable: "ה-AI עדיין לא מחובר – יש להוסיף את מפתח ה-API של Claude.",
       failed: "לא הצלחנו לקבל תשובה. נסו שוב.",
       declined: "ה-AI לא יכול לענות על זה.",
+      limit: "השתמשת בכל עזרת ה-AI להיום. היא תתחדש מחר.",
       explainLine: "הסבר לשורה",
       meaning: "משמעות",
       culture: "תרבות",
@@ -1362,10 +1409,19 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       signOut: "Cerrar sesión",
       unavailable: "El inicio de sesión se activa cuando la base de datos esté conectada.",
       error: "No se pudo enviar el enlace. Inténtalo de nuevo.",
+      deleteAccount: "Eliminar cuenta",
+      deleteWarning: "Esto elimina tu cuenta para siempre: palabras guardadas, progreso, mensajes, canciones que subiste y tu suscripción. No se puede deshacer.",
+      deleteConfirm: "Eliminar para siempre",
+      cancel: "Cancelar",
+      deleted: "Tu cuenta se eliminó.",
+      deleteFailed: "No se pudo eliminar tu cuenta. Inténtalo de nuevo.",
+      storeReminder: "Tu suscripción de App Store o Google Play no se cancela automáticamente. Cancélala en los ajustes de tu teléfono.",
+      privacy: "Política de privacidad",
+      terms: "Términos de uso",
     },
     catalog: { songs: "Canciones", beginner: "Principiante", demo: "Demo", notFound: "Esta canción no está en este dispositivo.", mine: "Mía", addSong: "Añadir una canción" },
     player: {
-      demoNote: "Canción de demostración: todavía no hay audio, así que la letra avanza con un temporizador. Toca cualquier palabra.",
+      demoNote: "Canción de demostración: no hay grabación, así que una voz lee cada línea. Toca cualquier palabra.",
       play: "Reproducir",
       pause: "Pausa",
       repeatLine: "Repetir línea",
@@ -1419,6 +1475,7 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       unavailable: "La IA aún no está conectada: añade la clave de la API de Claude.",
       failed: "No se pudo obtener respuesta. Inténtalo de nuevo.",
       declined: "La IA no pudo responder a esto.",
+      limit: "Ya usaste la ayuda de IA de hoy. Se renueva mañana.",
       explainLine: "Explicar la línea",
       meaning: "Significado",
       culture: "Cultura",
@@ -1758,10 +1815,19 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       signOut: "Вийти",
       unavailable: "Вхід запрацює після підключення бази даних.",
       error: "Не вдалося надіслати посилання. Спробуй ще раз.",
+      deleteAccount: "Видалити акаунт",
+      deleteWarning: "Це назавжди видалить ваш акаунт: збережені слова, прогрес, повідомлення, завантажені пісні й підписку. Скасувати це неможливо.",
+      deleteConfirm: "Видалити назавжди",
+      cancel: "Скасувати",
+      deleted: "Ваш акаунт видалено.",
+      deleteFailed: "Не вдалося видалити акаунт. Спробуйте ще раз.",
+      storeReminder: "Підписка в App Store або Google Play не скасовується автоматично. Скасуйте її в налаштуваннях телефона.",
+      privacy: "Політика конфіденційності",
+      terms: "Умови використання",
     },
     catalog: { songs: "Пісні", beginner: "Початковий", demo: "Демо", notFound: "Цієї пісні немає на цьому пристрої.", mine: "Моя", addSong: "Додати пісню" },
     player: {
-      demoNote: "Демо-пісня: звуку ще немає, тож текст рухається за таймером. Натискай на будь-яке слово.",
+      demoNote: "Демо-пісня: запису немає, тому голос читає кожен рядок. Торкніться будь-якого слова.",
       play: "Грати",
       pause: "Пауза",
       repeatLine: "Повтор рядка",
@@ -1815,6 +1881,7 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       unavailable: "ШІ ще не підключено — додай ключ Claude API.",
       failed: "Не вдалося отримати відповідь. Спробуй ще раз.",
       declined: "ШІ не зміг відповісти на це.",
+      limit: "Ви використали допомогу ШІ на сьогодні. Вона оновиться завтра.",
       explainLine: "Пояснити рядок",
       meaning: "Значення",
       culture: "Культура",
@@ -2154,10 +2221,19 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       signOut: "Выйти",
       unavailable: "Вход заработает после подключения базы данных.",
       error: "Не удалось отправить ссылку. Попробуй ещё раз.",
+      deleteAccount: "Удалить аккаунт",
+      deleteWarning: "Это навсегда удалит ваш аккаунт: сохранённые слова, прогресс, сообщения, загруженные песни и подписку. Отменить это нельзя.",
+      deleteConfirm: "Удалить навсегда",
+      cancel: "Отмена",
+      deleted: "Ваш аккаунт удалён.",
+      deleteFailed: "Не удалось удалить аккаунт. Попробуйте ещё раз.",
+      storeReminder: "Подписка в App Store или Google Play не отменяется автоматически. Отмените её в настройках телефона.",
+      privacy: "Политика конфиденциальности",
+      terms: "Условия использования",
     },
     catalog: { songs: "Песни", beginner: "Начальный", demo: "Демо", notFound: "Этой песни нет на этом устройстве.", mine: "Моя", addSong: "Добавить песню" },
     player: {
-      demoNote: "Демо-песня: звука пока нет, поэтому текст идёт по таймеру. Нажимай на любое слово.",
+      demoNote: "Демо-песня: записи нет, поэтому голос читает каждую строку. Нажмите на любое слово.",
       play: "Играть",
       pause: "Пауза",
       repeatLine: "Повтор строки",
@@ -2211,6 +2287,7 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       unavailable: "ИИ ещё не подключён — добавь ключ Claude API.",
       failed: "Не удалось получить ответ. Попробуй ещё раз.",
       declined: "ИИ не смог ответить на это.",
+      limit: "Вы использовали помощь ИИ на сегодня. Она обновится завтра.",
       explainLine: "Объяснить строку",
       meaning: "Смысл",
       culture: "Культура",
@@ -2556,6 +2633,15 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       signOut: "Abmelden",
       unavailable: "Die Anmeldung wird aktiv, sobald die Datenbank verbunden ist.",
       error: "Der Link konnte nicht gesendet werden. Versuch es noch einmal.",
+      deleteAccount: "Konto löschen",
+      deleteWarning: "Damit wird dein Konto endgültig gelöscht: gespeicherte Wörter, Fortschritt, Nachrichten, hochgeladene Songs und dein Abo. Das kann nicht rückgängig gemacht werden.",
+      deleteConfirm: "Endgültig löschen",
+      cancel: "Abbrechen",
+      deleted: "Dein Konto wurde gelöscht.",
+      deleteFailed: "Dein Konto konnte nicht gelöscht werden. Versuch es noch einmal.",
+      storeReminder: "Dein App-Store- oder Google-Play-Abo wird nicht automatisch gekündigt. Kündige es in den Einstellungen deines Telefons.",
+      privacy: "Datenschutz",
+      terms: "Nutzungsbedingungen",
     },
     catalog: {
       songs: "Songs",
@@ -2566,7 +2652,7 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       addSong: "Song hinzufügen",
     },
     player: {
-      demoNote: "Demo-Song: Noch kein Audio, der Text läuft nach Zeit. Tippe auf ein beliebiges Wort.",
+      demoNote: "Demo-Song: Es gibt keine Aufnahme, darum liest eine Stimme jede Zeile vor. Tippe auf ein beliebiges Wort.",
       play: "Abspielen",
       pause: "Pause",
       repeatLine: "Zeile wiederholen",
@@ -2620,6 +2706,7 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       unavailable: "Die KI ist noch nicht verbunden – füge den Claude-API-Schlüssel hinzu.",
       failed: "Keine Antwort erhalten. Versuch es noch einmal.",
       declined: "Darauf konnte die KI nicht antworten.",
+      limit: "Du hast die KI-Hilfe für heute aufgebraucht. Morgen geht es weiter.",
       explainLine: "Zeile erklären",
       meaning: "Bedeutung",
       culture: "Kultur",
@@ -2965,6 +3052,15 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       signOut: "تسجيل الخروج",
       unavailable: "يعمل تسجيل الدخول بعد ربط قاعدة البيانات.",
       error: "تعذّر إرسال الرابط. حاول مرة أخرى.",
+      deleteAccount: "حذف الحساب",
+      deleteWarning: "سيؤدي هذا إلى حذف حسابك نهائيًا: الكلمات المحفوظة والتقدم والرسائل والأغاني التي رفعتها والاشتراك. لا يمكن التراجع عن ذلك.",
+      deleteConfirm: "حذف نهائيًا",
+      cancel: "إلغاء",
+      deleted: "تم حذف حسابك.",
+      deleteFailed: "تعذّر حذف حسابك. حاول مرة أخرى.",
+      storeReminder: "لا يُلغى اشتراكك في App Store أو Google Play تلقائيًا. ألغِه من إعدادات هاتفك.",
+      privacy: "سياسة الخصوصية",
+      terms: "شروط الاستخدام",
     },
     catalog: {
       songs: "الأغاني",
@@ -2975,7 +3071,7 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       addSong: "إضافة أغنية",
     },
     player: {
-      demoNote: "أغنية تجريبية: لا يوجد صوت بعد، لذلك تتحرك الكلمات حسب الوقت. اضغط على أي كلمة.",
+      demoNote: "أغنية تجريبية: لا يوجد تسجيل، لذا يقرأ صوتٌ كل سطر عند ظهوره. المس أي كلمة.",
       play: "تشغيل",
       pause: "إيقاف مؤقت",
       repeatLine: "تكرار السطر",
@@ -3029,6 +3125,7 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       unavailable: "الذكاء الاصطناعي غير متصل بعد — أضف مفتاح Claude API.",
       failed: "تعذّر الحصول على إجابة. حاول مرة أخرى.",
       declined: "لم يتمكن الذكاء الاصطناعي من الإجابة عن هذا.",
+      limit: "لقد استخدمت مساعدة الذكاء الاصطناعي لهذا اليوم. تتجدد غدًا.",
       explainLine: "اشرح السطر",
       meaning: "المعنى",
       culture: "الثقافة",

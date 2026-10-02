@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { callAi } from "@/lib/ai/client";
+import { callAi, type AiFailure } from "@/lib/ai/client";
 import type { TutorResult } from "@/lib/ai/schemas";
 import { directionOf } from "@/lib/i18n";
 import { recordActivity, savedWordsStore, speak } from "@/lib/learnerStores";
@@ -28,7 +28,7 @@ export function Tutor() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<"not_configured" | "declined" | "failed" | null>(null);
+  const [error, setError] = useState<AiFailure | null>(null);
   const [shown, setShown] = useState<Set<number>>(new Set());
 
   const words = useMemo(() => {

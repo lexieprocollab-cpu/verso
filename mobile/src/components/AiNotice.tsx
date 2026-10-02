@@ -1,4 +1,5 @@
 import type { AiTask } from "@shared/lib/ai/schemas";
+import { aiFailureText } from "@shared/lib/i18n";
 import { ActivityIndicator, Text, View } from "react-native";
 import type { AiState } from "../lib/ai";
 import { usePreferences } from "../lib/usePreferences";
@@ -15,6 +16,6 @@ export function AiNotice<T extends AiTask>({ state }: { state: AiState<T> }) {
     );
   }
   if (state.status !== "error") return null;
-  const message = state.reason === "not_configured" ? t.ai.unavailable : state.reason === "declined" ? t.ai.declined : t.ai.failed;
+  const message = aiFailureText(t, state.reason);
   return <Text style={{ color: colors.muted }}>{message}</Text>;
 }

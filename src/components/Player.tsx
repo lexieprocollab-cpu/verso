@@ -7,6 +7,7 @@ import {
   LYRIC_COLORS,
   playerSettingsStore,
   speak,
+  stopSpeaking,
   updatePlayerSettings,
   type LyricColor,
   type LyricSize,
@@ -81,6 +82,22 @@ export function Player({ song, startLine, compact = false }: { song: Song; start
     if (current >= 0) lineRefs.current[current]?.scrollIntoView({ block: "center", behavior: "smooth" });
   }, [current]);
 
+  // A song without a recording (the demo) runs on a timer: a voice reads each line as it starts.
+  const voiced = !song.audioUrl && !videoId;
+  const currentText = current >= 0 ? song.lines[current].text : null;
+  useEffect(() => {
+    if (!voiced) return;
+    if (playing && currentText) speak(currentText, song.speechLang, 0.9 * rate);
+    else if (!playing) stopSpeaking();
+  }, [voiced, playing, currentText, rate, song.speechLang]);
+  useEffect(() => stopSpeaking, []);
+
+  function startPlaying() {
+    // Speaking inside the tap lets browsers that need a user gesture (Safari) start the voice.
+    if (voiced) speak(song.lines[focusLine].text, song.speechLang, 0.9 * rate);
+    play();
+  }
+
   function toggleRepeat() {
     const line = song.lines[focusLine];
     setLoop(loop ? null : { start: line.start, end: line.end });
@@ -116,7 +133,7 @@ export function Player({ song, startLine, compact = false }: { song: Song; start
         <div className="mt-3 flex items-center gap-3" dir="ltr">
           <button
             type="button"
-            onClick={playing ? pause : play}
+            onClick={playing ? pause : startPlaying}
             aria-label={playing ? t.player.pause : t.player.play}
             className="grid size-12 shrink-0 place-items-center rounded-full bg-accent text-white"
           >
@@ -220,7 +237,7 @@ export function Player({ song, startLine, compact = false }: { song: Song; start
         <span className="shrink-0 font-medium">{format(t.more.understood, { n: understood })}</span>
       </div>
 
-      {!song.audioUrl && <p className="mt-3 rounded-xl bg-accent-soft px-3 py-2 text-sm">{t.player.demoNote}</p>}
+      {voiced && <p className="mt-3 rounded-xl bg-accent-soft px-3 py-2 text-sm">{t.player.demoNote}</p>}
 
       <ol className={`mt-4 space-y-5 ${compact ? "max-h-96 overflow-y-auto pb-4" : "pb-[40vh]"}`} dir={directionOf(song.language)}>
         {song.lines.map((line, i) => {
@@ -268,7 +285,7 @@ export function Player({ song, startLine, compact = false }: { song: Song; start
       </ol>
 
       {selection && (
-        <WordCard song={song} selection={selection} meaningLang={meaningLang} onClose={() => setSelection(null)} onSelect={setSelection} />
+        <WordCard song={song} selection={selection} meaningLang={meaningLang} onClose={() => setSelection(null)} onSelect={setSelection} overVideo={Boolean(videoId)} />
       )}
     </section>
   );

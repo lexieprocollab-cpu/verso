@@ -69,6 +69,16 @@ function Player({ song, trialNumber, startLine }: { song: Song; trialNumber: num
     if (current >= 0) scroll.current?.scrollTo({ y: Math.max(0, (offsets.current[current] ?? 0) - 140), animated: true });
   }, [current]);
 
+  // A song without a recording (the demo) runs on a timer: the phone's voice reads each line as it starts.
+  const voiced = !song.audioUrl && !song.youtubeId;
+  const currentText = current >= 0 ? song.lines[current].text : null;
+  useEffect(() => {
+    if (!voiced) return;
+    void Speech.stop();
+    if (playback.playing && currentText) Speech.speak(currentText, { language: song.speechLang, rate: 0.9 * playback.rate });
+  }, [voiced, playback.playing, currentText, playback.rate, song.speechLang]);
+  useEffect(() => () => void Speech.stop(), []);
+
   // Listening time for the progress screen, in 5-second steps.
   useEffect(() => {
     if (!playback.playing) return;
@@ -171,7 +181,7 @@ function Player({ song, trialNumber, startLine }: { song: Song; trialNumber: num
 
       <ScrollView ref={scroll} contentContainerStyle={styles.lyrics}>
         <Text style={{ color: colors.muted }}>{format(t.more.understood, { n: understood })}</Text>
-        {!song.audioUrl && !song.youtubeId ? <Text style={{ color: colors.muted }}>{t.player.demoNote}</Text> : null}
+        {voiced ? <Text style={{ color: colors.muted }}>{t.player.demoNote}</Text> : null}
         {song.lines.map((lyric, i) => {
           const isCurrent = i === current;
           const highlight = isCurrent ? wordIndexAt(lyric, playback.time) : -1;
@@ -203,7 +213,7 @@ function Player({ song, trialNumber, startLine }: { song: Song; trialNumber: num
         })}
       </ScrollView>
 
-      {selection ? <WordCard song={song} selection={selection} meaning={meaning} onClose={() => setSelection(null)} /> : null}
+      {selection ? <WordCard song={song} selection={selection} meaning={meaning} onClose={() => setSelection(null)} overVideo={Boolean(song.youtubeId)} /> : null}
     </View>
   );
 }

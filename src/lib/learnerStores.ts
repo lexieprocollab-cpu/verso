@@ -181,6 +181,11 @@ export function speak(text: string, lang: string, rate = 0.9) {
   window.speechSynthesis.speak(utterance);
 }
 
+/** Stops anything the browser voice is saying. */
+export function stopSpeaking() {
+  if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
+}
+
 // First-visit onboarding: languages and favorite songs.
 export type Onboarding = {
   done: boolean;

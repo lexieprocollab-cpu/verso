@@ -2,7 +2,7 @@ import { directionOf, type UiLanguage } from "@shared/lib/i18n";
 import { lookupGloss, type Song } from "@shared/lib/song";
 import * as Speech from "expo-speech";
 import { useEffect } from "react";
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useAi } from "../lib/ai";
 import { isSaved, knownStore, savedWordsStore, toggleKnown, toggleSaved, wordId } from "../lib/learner";
 import { usePreferences } from "../lib/usePreferences";
@@ -10,8 +10,24 @@ import { AiNotice } from "./AiNotice";
 
 export type Selection = { key: string; word: string; line: number };
 
-/** Meaning of a tapped word: the song's dictionary first, else the AI; Save, "I know it" and pronunciation. */
-export function WordCard({ song, selection, meaning, onClose }: { song: Song; selection: Selection; meaning: UiLanguage | null; onClose: () => void }) {
+/**
+ * Meaning of a tapped word: the song's dictionary first, else the AI; Save, "I know it" and pronunciation.
+ * `overVideo`: the song plays in an embedded YouTube player, which nothing may cover or dim (YouTube API
+ * policy), so the card docks at the bottom of the screen instead of opening a full-screen modal.
+ */
+export function WordCard({
+  song,
+  selection,
+  meaning,
+  onClose,
+  overVideo = false,
+}: {
+  song: Song;
+  selection: Selection;
+  meaning: UiLanguage | null;
+  onClose: () => void;
+  overVideo?: boolean;
+}) {
   const { t, colors } = usePreferences();
   const saved = isSaved(savedWordsStore.useValue(), song.id, selection.key);
   const id = wordId(song.id, selection.key);
@@ -33,9 +49,7 @@ export function WordCard({ song, selection, meaning, onClose }: { song: Song; se
   const note = gloss?.note ?? (aiWord?.note || undefined);
   const meaningRtl = meaning ? directionOf(meaning) === "rtl" : false;
 
-  return (
-    <Modal transparent animationType="slide" visible onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel={t.word.close} />
+  const sheet = (
       <View style={[styles.sheet, { backgroundColor: colors.surface }]}>
         <View style={styles.head}>
           <Text style={[styles.word, { color: colors.text }]}>{selection.word}</Text>
@@ -80,12 +94,36 @@ export function WordCard({ song, selection, meaning, onClose }: { song: Song; se
           <Text style={{ color: colors.muted }}>{t.word.close}</Text>
         </Pressable>
       </View>
+  );
+
+  if (overVideo) {
+    return (
+      <View style={[styles.dock, { borderColor: colors.border }]}>
+        <ScrollView>{sheet}</ScrollView>
+      </View>
+    );
+  }
+  return (
+    <Modal transparent animationType="slide" visible onRequestClose={onClose}>
+      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel={t.word.close} />
+      {sheet}
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.35)" },
+  dock: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    maxHeight: "55%",
+    borderTopWidth: 1,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: "hidden",
+  },
   sheet: { padding: 20, paddingBottom: 32, borderTopLeftRadius: 24, borderTopRightRadius: 24, gap: 8 },
   head: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   word: { fontSize: 30, fontWeight: "800", flexShrink: 1 },

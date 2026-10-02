@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { callAi } from "@/lib/ai/client";
-import { LANGUAGE_NAMES, format } from "@/lib/i18n";
+import { LANGUAGE_NAMES, format, aiFailureText } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/i18n";
 import { utcDay, type OwnProfile, type RoomMessage, type RoomProfile, type RoomsBackend } from "@/lib/rooms/backend";
 import { challengeIndex, challengeWinner, checkMessage, outsideWords, songVocabulary, type RoomMode, type Vote } from "@/lib/rooms/rules";
@@ -150,7 +150,7 @@ function Chat({
     if (!meaning) return;
     setTranslations((all) => ({ ...all, [message.id]: t.ai.loading }));
     const outcome = await callAi("translate", { lines: [message.body], learn: song.language, target: meaning });
-    const text = outcome.ok ? outcome.data.translations[0] ?? "" : outcome.reason === "not_configured" ? t.ai.unavailable : t.ai.failed;
+    const text = outcome.ok ? outcome.data.translations[0] ?? "" : aiFailureText(t, outcome.reason);
     setTranslations((all) => ({ ...all, [message.id]: text }));
   }
 

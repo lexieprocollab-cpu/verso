@@ -1,14 +1,14 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { callAi } from "@/lib/ai/client";
+import { callAi, type AiFailure } from "@/lib/ai/client";
 import type { AiRequest, AiResponse, AiTask } from "@/lib/ai/schemas";
 
 export type AiState<T extends AiTask> =
   | { status: "idle" }
   | { status: "loading" }
   | { status: "done"; data: AiResponse<T> }
-  | { status: "error"; reason: "not_configured" | "declined" | "failed" };
+  | { status: "error"; reason: AiFailure };
 
 /** Runs one AI task on demand and tracks its state for the UI. */
 export function useAi<T extends AiTask>(task: T) {

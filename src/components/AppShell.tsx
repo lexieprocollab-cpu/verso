@@ -10,7 +10,7 @@ import { usePreferences } from "./Preferences";
 import { useHydrated } from "./useSongs";
 
 /** Pages reachable before onboarding: the welcome flow, team tools and artist pages. */
-const OPEN_PATHS = ["/welcome", "/studio", "/stats", "/artists", "/family"];
+const OPEN_PATHS = ["/welcome", "/studio", "/stats", "/artists", "/family", "/privacy", "/terms"];
 
 type NavKey = "catalog" | "player" | "words" | "practice" | "rooms";
 

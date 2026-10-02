@@ -1,4 +1,4 @@
-import { LANGUAGE_NAMES, format } from "@shared/lib/i18n";
+import { LANGUAGE_NAMES, format, aiFailureText } from "@shared/lib/i18n";
 import type { DirectMessage, OwnProfile, RoomsBackend } from "@shared/lib/rooms/backend";
 import { checkMessage } from "@shared/lib/rooms/rules";
 import { useLocalSearchParams } from "expo-router";
@@ -43,7 +43,7 @@ function DirectChat({ rooms, me, otherId }: { rooms: RoomsBackend; me: OwnProfil
     if (from === lang) return;
     setTranslations((all) => ({ ...all, [message.id]: t.ai.loading }));
     const outcome = await callAi("translate", { lines: [message.body], learn: from, target: lang });
-    setTranslations((all) => ({ ...all, [message.id]: outcome.ok ? (outcome.data.translations[0] ?? "") : outcome.reason === "not_configured" ? t.ai.unavailable : t.ai.failed }));
+    setTranslations((all) => ({ ...all, [message.id]: outcome.ok ? (outcome.data.translations[0] ?? "") : aiFailureText(t, outcome.reason) }));
   }
 
   return (

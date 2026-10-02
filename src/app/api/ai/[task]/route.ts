@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { AiRefusalError, AiUnavailableError } from "@/lib/ai/claude";
 import { AI_TASKS, isAiTask } from "@/lib/ai/schemas";
 import { runAiTask } from "@/lib/ai/tasks";
+import { takeAiRequest } from "@/lib/server/aiLimits";
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ task: string }> }) {
   const { task } = await params;
@@ -16,6 +17,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const body: unknown = await request.json().catch(() => null);
   const input = AI_TASKS[task].request.safeParse(body);
   if (!input.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
+
+  // A daily cap per learner (or guest address) keeps the AI bill bounded.
+  if (!(await takeAiRequest(request))) return NextResponse.json({ error: "daily_limit" }, { status: 429 });
 
   try {
     // The union of task inputs is validated above for this exact task.

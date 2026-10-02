@@ -310,4 +310,22 @@ do $$ begin
   exception when check_violation then null;
   end;
 end $$;
+-- AI limits: the server counts requests per day and stops at the limit.
+do $$ begin
+  assert public.take_ai_request('user:a', 2), 'first AI request allowed';
+  assert public.take_ai_request('user:a', 2), 'second AI request allowed';
+  assert not public.take_ai_request('user:a', 2), 'third AI request refused at a limit of 2';
+  assert public.take_ai_request('user:b', 2), 'limits are per subject';
+  assert (select count from public.ai_usage where subject = 'user:a') = 2, 'refused requests are not counted';
+end $$;
+set role authenticated;
+do $$ begin
+  begin
+    perform public.take_ai_request('user:a', 1000);
+    raise exception 'learners can call take_ai_request';
+  exception when insufficient_privilege then null;
+  end;
+  assert (select count(*) from public.ai_usage) = 0, 'learners cannot read AI usage';
+end $$;
+reset role;
 \echo 'RLS checks passed'
