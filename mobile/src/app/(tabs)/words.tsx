@@ -1,11 +1,13 @@
 import { LANGUAGE_NAMES, type UiLanguage } from "@shared/lib/i18n";
-import { lookupGloss } from "@shared/lib/song";
+import type { PhotoWord } from "@shared/lib/photoWords";
+import { SPEECH_LANG, lookupGloss } from "@shared/lib/song";
+import * as Speech from "expo-speech";
 import { isKnown, type ReviewState } from "@shared/lib/srs";
 import { Link } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Body, Button, Card, Chip, Field, Row, Screen } from "../../components/ui";
-import { knownStore, removeWord, reviewsStore, savedWordsStore, setNote, wordId, type SavedWord } from "../../lib/learner";
+import { forgetPhotoWord, knownStore, photoWordsStore, removeWord, reviewsStore, savedWordsStore, setNote, wordId, type SavedWord } from "../../lib/learner";
 import { useSongs } from "../../lib/songs";
 import { usePreferences } from "../../lib/usePreferences";
 
@@ -22,6 +24,7 @@ const normalize = (text: string) => text.toLowerCase().normalize("NFKD").replace
 export default function Words() {
   const { t, meaningFor } = usePreferences();
   const words = savedWordsStore.useValue();
+  const photoWords = photoWordsStore.useValue();
   const known = knownStore.useValue();
   const reviews = reviewsStore.useValue();
   const songs = useSongs();
@@ -44,7 +47,7 @@ export default function Words() {
     return [w.word, w.note, ...meanings].some((field) => field && normalize(field).includes(q));
   });
 
-  if (words.length === 0) {
+  if (words.length === 0 && photoWords.length === 0) {
     return (
       <Screen>
         <Body muted style={{ textAlign: "center", marginTop: 40 }}>
@@ -56,38 +59,71 @@ export default function Words() {
 
   return (
     <Screen>
-      <Field value={query} onChangeText={setQuery} placeholder={t.mywords.search} />
-      <Row>
-        {(["all", "new", "learning", "known"] as const).map((s) => (
-          <Chip key={s} label={s === "all" ? t.mywords.all : s === "new" ? t.mywords.statusNew : s === "learning" ? t.mywords.statusLearning : t.mywords.statusKnown} active={status === s} onPress={() => setStatus(s)} />
-        ))}
-      </Row>
-      {usedSongs.length > 1 ? (
-        <Row>
-          <Chip label={t.mywords.allSongs} active={songFilter === "all"} onPress={() => setSongFilter("all")} />
-          {usedSongs.map((s) => (
-            <Chip key={s.id} label={s.title} active={songFilter === s.id} onPress={() => setSongFilter(s.id)} />
+      {words.length > 0 ? (
+        <>
+          <Field value={query} onChangeText={setQuery} placeholder={t.mywords.search} />
+          <Row>
+            {(["all", "new", "learning", "known"] as const).map((s) => (
+              <Chip key={s} label={s === "all" ? t.mywords.all : s === "new" ? t.mywords.statusNew : s === "learning" ? t.mywords.statusLearning : t.mywords.statusKnown} active={status === s} onPress={() => setStatus(s)} />
+            ))}
+          </Row>
+          {usedSongs.length > 1 ? (
+            <Row>
+              <Chip label={t.mywords.allSongs} active={songFilter === "all"} onPress={() => setSongFilter("all")} />
+              {usedSongs.map((s) => (
+                <Chip key={s.id} label={s.title} active={songFilter === s.id} onPress={() => setSongFilter(s.id)} />
+              ))}
+            </Row>
+          ) : null}
+          {usedLanguages.length > 1 ? (
+            <Row>
+              <Chip label={t.mywords.allLanguages} active={langFilter === "all"} onPress={() => setLangFilter("all")} />
+              {usedLanguages.map((code) => (
+                <Chip key={code} label={LANGUAGE_NAMES[code]} active={langFilter === code} onPress={() => setLangFilter(code)} />
+              ))}
+            </Row>
+          ) : null}
+          <Body muted>{t.words.count.replace("{n}", String(shown.length))}</Body>
+          {shown.length === 0 ? <Body muted>{t.mywords.noMatch}</Body> : null}
+          {shown.map((w) => (
+            <WordRow key={`${w.songId}:${w.key}`} entry={w} meaning={(() => {
+              const song = songOf(w.songId);
+              const lang = song ? meaningFor(song.language) : null;
+              return song && lang ? lookupGloss(song, w.key)?.meanings[lang] : undefined;
+            })()} line={songOf(w.songId)?.lines[w.line]?.text} status={statusOf(wordId(w.songId, w.key), known, reviews)} />
           ))}
-        </Row>
+        </>
       ) : null}
-      {usedLanguages.length > 1 ? (
-        <Row>
-          <Chip label={t.mywords.allLanguages} active={langFilter === "all"} onPress={() => setLangFilter("all")} />
-          {usedLanguages.map((code) => (
-            <Chip key={code} label={LANGUAGE_NAMES[code]} active={langFilter === code} onPress={() => setLangFilter(code)} />
+      {photoWords.length > 0 ? (
+        <>
+          <Body style={{ fontSize: 20, fontWeight: "700", marginTop: 8 }}>📷 {t.photo.fromPhotos}</Body>
+          {photoWords.map((w) => (
+            <PhotoWordRow key={w.id} word={w} status={statusOf(w.id, known, reviews)} />
           ))}
-        </Row>
+        </>
       ) : null}
-      <Body muted>{t.words.count.replace("{n}", String(shown.length))}</Body>
-      {shown.length === 0 ? <Body muted>{t.mywords.noMatch}</Body> : null}
-      {shown.map((w) => (
-        <WordRow key={`${w.songId}:${w.key}`} entry={w} meaning={(() => {
-          const song = songOf(w.songId);
-          const lang = song ? meaningFor(song.language) : null;
-          return song && lang ? lookupGloss(song, w.key)?.meanings[lang] : undefined;
-        })()} line={songOf(w.songId)?.lines[w.line]?.text} status={statusOf(wordId(w.songId, w.key), known, reviews)} />
-      ))}
     </Screen>
+  );
+}
+
+function PhotoWordRow({ word, status }: { word: PhotoWord; status: "new" | "learning" | "known" }) {
+  const { t, colors } = usePreferences();
+  const label = status === "new" ? t.mywords.statusNew : status === "learning" ? t.mywords.statusLearning : t.mywords.statusKnown;
+  return (
+    <Card>
+      <View style={styles.head}>
+        <Pressable accessibilityRole="button" onPress={() => Speech.speak(word.word, { language: SPEECH_LANG[word.learn], rate: 0.8 })} style={{ flexShrink: 1 }}>
+          <Text style={[styles.word, { color: colors.text }]}>{word.word} 🔊</Text>
+        </Pressable>
+        <Text style={{ color: status === "known" ? colors.good : colors.muted }}>{label}</Text>
+      </View>
+      <Text style={{ color: colors.text }}>{word.meaning}</Text>
+      <Text style={{ color: colors.muted }}>{word.definition}</Text>
+      {word.example ? <Text style={{ color: colors.muted }}>“{word.example}”</Text> : null}
+      <Pressable accessibilityRole="button" onPress={() => forgetPhotoWord(word.id)}>
+        <Text style={{ color: colors.muted }}>{t.words.remove}</Text>
+      </Pressable>
+    </Card>
   );
 }
 

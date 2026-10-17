@@ -25,7 +25,14 @@
     },
     "scheme": "verso",
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Verso uses the camera so you can photograph things and learn their words.",
+          "photosPermission": "Verso opens your photos so you can pick one and learn the words for what's in it."
+        }
+      ]
     ],
     "experiments": {
       "tsconfigPaths": true

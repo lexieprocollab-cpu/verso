@@ -127,12 +127,44 @@ export const tutorResult = z.object({
   explanation: z.string().describe("One short, kind explanation of the mistake in the learner's language, or empty"),
 });
 
+/** Largest photo accepted, as base64 characters (~1.5 MB of image; the apps send ~150 KB). */
+export const MAX_PHOTO_BASE64 = 2_000_000;
+
+export const photoRequest = z.object({
+  /** The photo as base64, without a data: prefix. */
+  image: z
+    .string()
+    .min(100)
+    .max(MAX_PHOTO_BASE64)
+    .regex(/^[A-Za-z0-9+/]+={0,2}$/),
+  mediaType: z.enum(["image/jpeg", "image/png", "image/webp"]),
+  learn: lang,
+  meaning: lang,
+});
+export const photoResult = z.object({
+  items: z
+    .array(
+      z.object({
+        word: z.string().describe("The thing's name in the language being learned, as a learner would say it (with the article where natural, e.g. 'la tasse', 'der Tisch')"),
+        reading: z.string().describe("Pronunciation help in Latin letters for Hebrew, Arabic, Ukrainian or Russian words; empty otherwise"),
+        meaning: z.string().describe("The word translated into the learner's language"),
+        definition: z.string().describe("One short, simple definition in the learner's language"),
+        example: z.string().describe("A short everyday sentence using the word, in the language being learned"),
+        example_meaning: z.string().describe("The example sentence translated into the learner's language"),
+        x: z.number().int().describe("Horizontal position of the thing's centre: 0 = left edge, 1000 = right edge"),
+        y: z.number().int().describe("Vertical position of the thing's centre: 0 = top edge, 1000 = bottom edge"),
+      }),
+    )
+    .describe("The clearly visible things worth learning, most prominent first; at most 8"),
+});
+
 export type WordResult = z.infer<typeof wordResult>;
 export type ExplainResult = z.infer<typeof explainResult>;
 export type QuizResult = z.infer<typeof quizResult>;
 export type CheckResult = z.infer<typeof checkResult>;
 export type MakeSentenceResult = z.infer<typeof makeSentenceResult>;
 export type TutorResult = z.infer<typeof tutorResult>;
+export type PhotoResult = z.infer<typeof photoResult>;
 
 export const AI_TASKS = {
   word: { request: wordRequest, result: wordResult },
@@ -143,6 +175,7 @@ export const AI_TASKS = {
   sentence: { request: makeSentenceRequest, result: makeSentenceResult },
   translate: { request: translateRequest, result: translateResult },
   tutor: { request: tutorRequest, result: tutorResult },
+  photo: { request: photoRequest, result: photoResult },
 } as const;
 
 export type AiTask = keyof typeof AI_TASKS;

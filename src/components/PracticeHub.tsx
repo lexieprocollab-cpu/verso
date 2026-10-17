@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { demoSong } from "@/content/demoSong";
 import { format } from "@/lib/i18n";
-import { reviewsStore, savedWordsStore, wordId } from "@/lib/learnerStores";
+import { photoWordsStore, reviewsStore, savedWordsStore, wordId } from "@/lib/learnerStores";
 import { isDue } from "@/lib/srs";
 import { usePreferences } from "./Preferences";
 import { useStreak } from "./useProgress";
@@ -12,18 +12,22 @@ import { useStreak } from "./useProgress";
 export function PracticeHub() {
   const { t } = usePreferences();
   const words = savedWordsStore.useValue();
+  const photoWords = photoWordsStore.useValue();
   const reviews = reviewsStore.useValue();
   const streakDays = useStreak();
   const [now] = useState(() => Date.now());
-  const due = words.filter((w) => isDue(reviews[wordId(w.songId, w.key)], now)).length;
+  const due =
+    words.filter((w) => isDue(reviews[wordId(w.songId, w.key)], now)).length + photoWords.filter((w) => isDue(reviews[w.id], now)).length;
+  const total = words.length + photoWords.length;
 
   const cards = [
     {
       href: "/practice/review",
       icon: "🃏",
       title: t.practice.review,
-      detail: words.length === 0 ? t.words.empty : due > 0 ? format(t.practice.reviewDue, { n: due }) : t.practice.reviewNone,
+      detail: total === 0 ? t.words.empty : due > 0 ? format(t.practice.reviewDue, { n: due }) : t.practice.reviewNone,
     },
+    { href: "/practice/photo", icon: "📷", title: t.photo.title, detail: t.photo.hint },
     { href: "/practice/quiz", icon: "🎯", title: t.practice.quiz, detail: demoSong.title },
     { href: "/practice/sentence", icon: "🧩", title: t.practice.sentence, detail: t.sentence.hint },
     { href: "/practice/tutor", icon: "💬", title: t.tutor.title, detail: t.tutor.hint },

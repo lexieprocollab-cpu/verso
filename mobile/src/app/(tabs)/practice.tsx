@@ -4,7 +4,7 @@ import { Link, type Href } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../../components/ui";
-import { onboardingStore, reviewsStore, savedWordsStore, wordId } from "../../lib/learner";
+import { onboardingStore, photoWordsStore, reviewsStore, savedWordsStore, wordId } from "../../lib/learner";
 import { useSongs } from "../../lib/songs";
 import { usePreferences } from "../../lib/usePreferences";
 
@@ -12,15 +12,19 @@ import { usePreferences } from "../../lib/usePreferences";
 export default function Practice() {
   const { t, colors } = usePreferences();
   const words = savedWordsStore.useValue();
+  const photoWords = photoWordsStore.useValue();
   const reviews = reviewsStore.useValue();
   const songs = useSongs();
   const learn = onboardingStore.useValue().learn;
   const [now] = useState(() => Date.now());
-  const due = words.filter((w) => isDue(reviews[wordId(w.songId, w.key)], now)).length;
+  const due =
+    words.filter((w) => isDue(reviews[wordId(w.songId, w.key)], now)).length + photoWords.filter((w) => isDue(reviews[w.id], now)).length;
+  const total = words.length + photoWords.length;
   const quizSong = songs.find((s) => s.language === learn) ?? songs[0];
 
   const cards: { href: Href; icon: string; title: string; detail: string }[] = [
-    { href: "/review", icon: "🃏", title: t.practice.review, detail: words.length === 0 ? t.words.empty : due > 0 ? format(t.practice.reviewDue, { n: due }) : t.practice.reviewNone },
+    { href: "/review", icon: "🃏", title: t.practice.review, detail: total === 0 ? t.words.empty : due > 0 ? format(t.practice.reviewDue, { n: due }) : t.practice.reviewNone },
+    { href: "/photo", icon: "📷", title: t.photo.title, detail: t.photo.hint },
     { href: { pathname: "/quiz/[id]", params: { id: quizSong?.id ?? "" } }, icon: "🎯", title: t.practice.quiz, detail: quizSong?.title ?? "" },
     { href: "/sentence", icon: "🧩", title: t.practice.sentence, detail: t.sentence.hint },
     { href: "/tutor", icon: "💬", title: t.tutor.title, detail: t.tutor.hint },

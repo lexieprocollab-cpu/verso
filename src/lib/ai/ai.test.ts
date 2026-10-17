@@ -114,3 +114,57 @@ describe("AI tutor", () => {
     expect((await call("tutor", { learn: "en", meaning: "fr", level: "easy", words: [], history: long })).status).toBe(400);
   });
 });
+
+describe("photo task", () => {
+  beforeEach(() => {
+    vi.stubEnv("ANTHROPIC_API_KEY", "sk-ant-test");
+    parse.mockReset();
+  });
+  afterEach(() => vi.unstubAllEnvs());
+
+  const image = "A".repeat(400);
+  const item = (word: string, x: number, y: number) => ({
+    word,
+    reading: "",
+    meaning: "cup",
+    definition: "Something you drink from",
+    example: "Je prends la tasse.",
+    example_meaning: "I take the cup.",
+    x,
+    y,
+  });
+
+  it("sends the photo before the prompt and tidies the answer", async () => {
+    parse.mockResolvedValueOnce({
+      stop_reason: "end_turn",
+      parsed_output: { items: [item(" la tasse ", 1500, -20), item("La tasse", 10, 10), item("", 5, 5), item("le stylo", 300, 700)] },
+    });
+    const response = await call("photo", { image, mediaType: "image/jpeg", learn: "fr", meaning: "en" });
+    expect(response.status).toBe(200);
+    const { items } = await response.json();
+    expect(items.map((i: { word: string; x: number; y: number }) => [i.word, i.x, i.y])).toEqual([
+      ["la tasse", 1000, 0],
+      ["le stylo", 300, 700],
+    ]);
+
+    const content = parse.mock.calls[0][0].messages[0].content;
+    expect(content[0]).toEqual({ type: "image", source: { type: "base64", media_type: "image/jpeg", data: image } });
+    expect(content[1].type).toBe("text");
+    expect(content[1].text).toContain("French");
+  });
+
+  it("does not cache photo answers", async () => {
+    parse.mockResolvedValue({ stop_reason: "end_turn", parsed_output: { items: [] } });
+    const body = { image, mediaType: "image/jpeg", learn: "es", meaning: "en" };
+    await call("photo", body);
+    await call("photo", body);
+    expect(parse).toHaveBeenCalledTimes(2);
+  });
+
+  it("refuses files that are not small images", async () => {
+    expect((await call("photo", { image: "not base64!", mediaType: "image/jpeg", learn: "fr", meaning: "en" })).status).toBe(400);
+    expect((await call("photo", { image, mediaType: "image/gif", learn: "fr", meaning: "en" })).status).toBe(400);
+    expect((await call("photo", { image: "A".repeat(2_000_004), mediaType: "image/jpeg", learn: "fr", meaning: "en" })).status).toBe(400);
+    expect(parse).not.toHaveBeenCalled();
+  });
+});

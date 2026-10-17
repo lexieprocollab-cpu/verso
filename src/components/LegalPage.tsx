@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 /** Contact address for privacy and legal questions; NEXT_PUBLIC_CONTACT_EMAIL in Vercel overrides it. */
 export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "lexieprocollab@gmail.com";
 
-export const LEGAL_UPDATED = "2 October 2026";
+export const LEGAL_UPDATED = "17 October 2026";
 
 /** Shared layout for the privacy policy and terms (English; the binding version). */
 export function LegalPage({ title, children }: { title: string; children: ReactNode }) {

@@ -65,6 +65,24 @@ export type Dictionary = {
     practice: string;
     rooms: string;
   };
+  photo: {
+    title: string;
+    camera: string;
+    choose: string;
+    hint: string;
+    intro: string;
+    take: string;
+    another: string;
+    learnIn: string;
+    looking: string;
+    none: string;
+    tapHint: string;
+    definition: string;
+    example: string;
+    failed: string;
+    fromPhotos: string;
+    privacy: string;
+  };
   account: {
     title: string;
     emailPlaceholder: string;
@@ -181,6 +199,24 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       words: "Every word you save, with the line it came from.",
       practice: "Flashcards, fill the lyric and the sentence builder.",
       rooms: "Learn together with fans of the same song.",
+    },
+    photo: {
+      title: "Snap & learn",
+      camera: "📷 Take a photo",
+      choose: "🖼 Choose from your photos",
+      hint: "Photo anything, tap it, learn the word",
+      intro: "Take a photo of anything around you, then tap a dot to learn its word.",
+      take: "📷 Take or choose a photo",
+      another: "New photo",
+      learnIn: "Learn in",
+      looking: "Looking at your photo…",
+      none: "No words found in this photo. Try another one.",
+      tapHint: "Tap a dot to learn the word",
+      definition: "Definition",
+      example: "Example",
+      failed: "Couldn't read that photo. Try another one.",
+      fromPhotos: "From photos",
+      privacy: "Photos are sent to our AI to find the words and aren't stored.",
     },
     account: {
       title: "Account",
@@ -588,6 +624,24 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       practice: "Cartes mémoire, paroles à compléter et constructeur de phrases.",
       rooms: "Apprends avec les fans de la même chanson.",
     },
+    photo: {
+      title: "Photo & apprends",
+      camera: "📷 Prendre une photo",
+      choose: "🖼 Choisir dans tes photos",
+      hint: "Prends une photo, touche, apprends le mot",
+      intro: "Prends en photo ce qui t'entoure, puis touche un point pour apprendre le mot.",
+      take: "📷 Prendre ou choisir une photo",
+      another: "Nouvelle photo",
+      learnIn: "Apprendre en",
+      looking: "Analyse de ta photo…",
+      none: "Aucun mot trouvé sur cette photo. Essaie une autre.",
+      tapHint: "Touche un point pour apprendre le mot",
+      definition: "Définition",
+      example: "Exemple",
+      failed: "Impossible de lire cette photo. Essaie une autre.",
+      fromPhotos: "Depuis les photos",
+      privacy: "Les photos sont envoyées à notre IA pour trouver les mots et ne sont pas conservées.",
+    },
     account: {
       title: "Compte",
       emailPlaceholder: "toi@exemple.com",
@@ -993,6 +1047,24 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       words: "כל מילה ששמרתם, עם השורה שממנה היא הגיעה.",
       practice: "כרטיסיות, השלמת מילים ובניית משפטים.",
       rooms: "ללמוד יחד עם מעריצים של אותו שיר.",
+    },
+    photo: {
+      title: "צלמו ולמדו",
+      camera: "📷 צילום תמונה",
+      choose: "🖼 בחירה מהתמונות שלך",
+      hint: "צלמו כל דבר, הקישו ולמדו את המילה",
+      intro: "צלמו כל דבר סביבכם, ואז הקישו על נקודה כדי ללמוד את המילה.",
+      take: "📷 צילום או בחירת תמונה",
+      another: "תמונה חדשה",
+      learnIn: "ללמוד ב",
+      looking: "בודקים את התמונה…",
+      none: "לא נמצאו מילים בתמונה. נסו תמונה אחרת.",
+      tapHint: "הקישו על נקודה כדי ללמוד את המילה",
+      definition: "הגדרה",
+      example: "דוגמה",
+      failed: "לא הצלחנו לקרוא את התמונה. נסו תמונה אחרת.",
+      fromPhotos: "מתמונות",
+      privacy: "התמונות נשלחות ל-AI שלנו כדי למצוא את המילים ואינן נשמרות.",
     },
     account: {
       title: "חשבון",
@@ -1400,6 +1472,24 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       practice: "Tarjetas, completa la letra y el constructor de frases.",
       rooms: "Aprende junto a fans de la misma canción.",
     },
+    photo: {
+      title: "Foto y aprende",
+      camera: "📷 Hacer una foto",
+      choose: "🖼 Elegir de tus fotos",
+      hint: "Fotografía algo, tócalo y aprende la palabra",
+      intro: "Haz una foto de lo que tienes alrededor y toca un punto para aprender la palabra.",
+      take: "📷 Hacer o elegir una foto",
+      another: "Nueva foto",
+      learnIn: "Aprender en",
+      looking: "Mirando tu foto…",
+      none: "No se encontraron palabras en esta foto. Prueba con otra.",
+      tapHint: "Toca un punto para aprender la palabra",
+      definition: "Definición",
+      example: "Ejemplo",
+      failed: "No se pudo leer esa foto. Prueba con otra.",
+      fromPhotos: "De fotos",
+      privacy: "Las fotos se envían a nuestra IA para encontrar las palabras y no se guardan.",
+    },
     account: {
       title: "Cuenta",
       emailPlaceholder: "tu@ejemplo.com",
@@ -1806,6 +1896,24 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       practice: "Картки, встав слово та конструктор речень.",
       rooms: "Вчися разом із фанатами тієї ж пісні.",
     },
+    photo: {
+      title: "Сфотографуй і вивчай",
+      camera: "📷 Зробити фото",
+      choose: "🖼 Вибрати з ваших фото",
+      hint: "Сфотографуй, торкнись і вивчи слово",
+      intro: "Сфотографуйте будь-що навколо, а потім торкніться крапки, щоб вивчити слово.",
+      take: "📷 Зробити або вибрати фото",
+      another: "Нове фото",
+      learnIn: "Вивчати мовою",
+      looking: "Розглядаємо ваше фото…",
+      none: "На цьому фото не знайдено слів. Спробуйте інше.",
+      tapHint: "Торкніться крапки, щоб вивчити слово",
+      definition: "Визначення",
+      example: "Приклад",
+      failed: "Не вдалося прочитати фото. Спробуйте інше.",
+      fromPhotos: "З фото",
+      privacy: "Фото надсилаються нашому ШІ, щоб знайти слова, і не зберігаються.",
+    },
     account: {
       title: "Обліковий запис",
       emailPlaceholder: "you@example.com",
@@ -2211,6 +2319,24 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       words: "Все сохранённые слова вместе со строкой, откуда они.",
       practice: "Карточки, вставь слово и конструктор предложений.",
       rooms: "Учись вместе с фанатами той же песни.",
+    },
+    photo: {
+      title: "Сфотографируй и учи",
+      camera: "📷 Сделать фото",
+      choose: "🖼 Выбрать из ваших фото",
+      hint: "Сфотографируй, нажми и выучи слово",
+      intro: "Сфотографируйте что угодно вокруг, а затем нажмите на точку, чтобы выучить слово.",
+      take: "📷 Сделать или выбрать фото",
+      another: "Новое фото",
+      learnIn: "Учить на",
+      looking: "Смотрим ваше фото…",
+      none: "На этом фото не найдено слов. Попробуйте другое.",
+      tapHint: "Нажмите на точку, чтобы выучить слово",
+      definition: "Определение",
+      example: "Пример",
+      failed: "Не удалось прочитать фото. Попробуйте другое.",
+      fromPhotos: "Из фото",
+      privacy: "Фото отправляются нашему ИИ, чтобы найти слова, и не сохраняются.",
     },
     account: {
       title: "Аккаунт",
@@ -2623,6 +2749,24 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       words: "Jedes gespeicherte Wort mit der Zeile, aus der es stammt.",
       practice: "Karteikarten, Lückentext und Satzbaukasten.",
       rooms: "Lerne gemeinsam mit Fans desselben Songs.",
+    },
+    photo: {
+      title: "Foto & lernen",
+      camera: "📷 Foto aufnehmen",
+      choose: "🖼 Aus deinen Fotos wählen",
+      hint: "Fotografiere etwas, tippe darauf, lerne das Wort",
+      intro: "Fotografiere etwas in deiner Umgebung und tippe dann auf einen Punkt, um das Wort zu lernen.",
+      take: "📷 Foto aufnehmen oder auswählen",
+      another: "Neues Foto",
+      learnIn: "Lernen auf",
+      looking: "Dein Foto wird angesehen…",
+      none: "Auf diesem Foto wurden keine Wörter gefunden. Versuch ein anderes.",
+      tapHint: "Tippe auf einen Punkt, um das Wort zu lernen",
+      definition: "Definition",
+      example: "Beispiel",
+      failed: "Das Foto konnte nicht gelesen werden. Versuch ein anderes.",
+      fromPhotos: "Aus Fotos",
+      privacy: "Fotos werden an unsere KI geschickt, um die Wörter zu finden, und nicht gespeichert.",
     },
     account: {
       title: "Konto",
@@ -3042,6 +3186,24 @@ export const dictionaries: Record<UiLanguage, Dictionary> = {
       words: "كل كلمة تحفظها مع السطر الذي جاءت منه.",
       practice: "بطاقات تعليمية، وإكمال الكلمات، وبناء الجمل.",
       rooms: "تعلّم مع محبّي الأغنية نفسها.",
+    },
+    photo: {
+      title: "صوّر وتعلّم",
+      camera: "📷 التقاط صورة",
+      choose: "🖼 اختر من صورك",
+      hint: "صوّر أي شيء، المسه، وتعلّم الكلمة",
+      intro: "التقط صورة لأي شيء حولك، ثم المس نقطة لتتعلّم الكلمة.",
+      take: "📷 التقاط صورة أو اختيارها",
+      another: "صورة جديدة",
+      learnIn: "التعلّم بـ",
+      looking: "نفحص صورتك…",
+      none: "لم نجد كلمات في هذه الصورة. جرّب صورة أخرى.",
+      tapHint: "المس نقطة لتتعلّم الكلمة",
+      definition: "التعريف",
+      example: "مثال",
+      failed: "تعذّرت قراءة الصورة. جرّب صورة أخرى.",
+      fromPhotos: "من الصور",
+      privacy: "تُرسل الصور إلى الذكاء الاصطناعي لدينا لإيجاد الكلمات ولا تُحفظ.",
     },
     account: {
       title: "الحساب",

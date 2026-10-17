@@ -48,6 +48,7 @@ export async function askJson<T>({
   schema,
   effort = "low",
   maxTokens = 4000,
+  image,
 }: {
   /** Cache namespace, e.g. "word". */
   task: string;
@@ -56,9 +57,11 @@ export async function askJson<T>({
   schema: z.ZodType<T>;
   effort?: "low" | "medium" | "high";
   maxTokens?: number;
+  /** A photo to look at, sent before the prompt. Answers about photos are not cached. */
+  image?: { mediaType: "image/jpeg" | "image/png" | "image/webp"; data: string };
 }): Promise<T> {
-  const cacheKey = `${task}\n${prompt}`;
-  if (cache.has(cacheKey)) return cache.get(cacheKey) as T;
+  const cacheKey = image ? null : `${task}\n${prompt}`;
+  if (cacheKey && cache.has(cacheKey)) return cache.get(cacheKey) as T;
 
   const response = await getClient().beta.messages.parse({
     model: MODEL,
@@ -67,7 +70,17 @@ export async function askJson<T>({
     fallbacks: "default",
     system,
     output_config: { effort, format: betaZodOutputFormat(schema) },
-    messages: [{ role: "user", content: prompt }],
+    messages: [
+      {
+        role: "user",
+        content: image
+          ? [
+              { type: "image", source: { type: "base64", media_type: image.mediaType, data: image.data } },
+              { type: "text", text: prompt },
+            ]
+          : prompt,
+      },
+    ],
   });
 
   if (response.stop_reason === "refusal") {
@@ -76,5 +89,6 @@ export async function askJson<T>({
   if (response.parsed_output === null) {
     throw new Error(`Unparseable AI response (stop_reason: ${response.stop_reason})`);
   }
-  return remember(cacheKey, response.parsed_output as T);
+  const result = response.parsed_output as T;
+  return cacheKey ? remember(cacheKey, result) : result;
 }

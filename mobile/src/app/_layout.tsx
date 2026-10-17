@@ -38,6 +38,7 @@ export default function Layout() {
         <Stack.Screen name="review" options={{ title: t.practice.review }} />
         <Stack.Screen name="sentence" options={{ title: t.sentence.title }} />
         <Stack.Screen name="tutor" options={{ title: t.tutor.title }} />
+        <Stack.Screen name="photo" options={{ title: t.photo.title }} />
         <Stack.Screen name="progress" options={{ title: t.stats.title }} />
         <Stack.Screen name="paywall" options={{ title: t.paywall.plan, presentation: "modal" }} />
         <Stack.Screen name="room/[id]" options={{ title: t.rooms.title }} />

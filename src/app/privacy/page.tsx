@@ -46,6 +46,11 @@ export default function PrivacyPage() {
           sent to our AI provider to write the answer. To limit use per day we count requests by account, or for guests by a scrambled
           (hashed) form of the IP address; these counts are deleted after 7 days.
         </li>
+        <li>
+          <strong>Photos (Snap &amp; learn):</strong> a photo you take to learn words is made smaller on your device and sent to our AI provider
+          to name the things in it. Verso does not keep the photo; the words you save stay on your device. Please don&apos;t photograph
+          people who haven&apos;t agreed to it.
+        </li>
       </ul>
 
       <h2>Who helps us run Verso</h2>

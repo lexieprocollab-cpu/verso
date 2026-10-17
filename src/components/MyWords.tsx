@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { LANGUAGE_NAMES, UI_LANGUAGES, directionOf, format, type UiLanguage } from "@/lib/i18n";
 import {
+  forgetPhotoWord,
   knownWordsStore,
+  photoWordsStore,
   matchesSearch,
   removeWord,
   reviewsStore,
@@ -16,7 +18,9 @@ import {
   type SavedWord,
   type WordStatus,
 } from "@/lib/learnerStores";
-import { lookupGloss, type Song } from "@/lib/song";
+import type { PhotoWord } from "@/lib/photoWords";
+import { SPEECH_LANG, lookupGloss, type Song } from "@/lib/song";
+import type { ReviewState } from "@/lib/srs";
 import { usePreferences } from "./Preferences";
 import { useMeaningLang } from "./useMeaningLang";
 import { useSongs } from "./useSongs";
@@ -30,6 +34,7 @@ const STATUS_STYLE: Record<WordStatus, string> = {
 export function MyWords() {
   const { t } = usePreferences();
   const words = savedWordsStore.useValue();
+  const photoWords = photoWordsStore.useValue();
   const known = knownWordsStore.useValue();
   const reviews = reviewsStore.useValue();
   const songs = useSongs();
@@ -63,9 +68,9 @@ export function MyWords() {
   return (
     <section className="pt-4">
       <h1 className="text-3xl font-bold">{t.nav.words}</h1>
-      {words.length === 0 ? (
+      {words.length === 0 && photoWords.length === 0 ? (
         <p className="mt-6 rounded-2xl border border-dashed border-border bg-surface p-8 text-center text-muted">{t.words.empty}</p>
-      ) : (
+      ) : words.length === 0 ? null : (
         <>
           <p className="mt-1 text-muted">{format(t.words.count, { n: words.length })}</p>
 
@@ -137,7 +142,58 @@ export function MyWords() {
           )}
         </>
       )}
+      {photoWords.length > 0 && <PhotoWordList words={photoWords} known={known} reviews={reviews} />}
     </section>
+  );
+}
+
+/** Words saved from Snap & learn, newest first. */
+function PhotoWordList({ words, known, reviews }: { words: PhotoWord[]; known: string[]; reviews: Record<string, ReviewState> }) {
+  const { t } = usePreferences();
+  return (
+    <div className="mt-8">
+      <h2 className="text-xl font-bold">📷 {t.photo.fromPhotos}</h2>
+      <ul className="mt-3 grid gap-3">
+        {words.map((w) => {
+          const status = wordStatus(w.id, known, reviews);
+          return (
+            <li key={w.id} className="rounded-2xl border border-border bg-surface p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <button
+                    type="button"
+                    onClick={() => speak(w.word, SPEECH_LANG[w.learn], 0.8)}
+                    className="text-left text-2xl font-bold"
+                    dir={directionOf(w.learn)}
+                  >
+                    {w.word} <span className="text-base">🔊</span>
+                  </button>
+                  <p className="mt-0.5 text-lg" dir={directionOf(w.meaningLang)}>
+                    {w.meaning}
+                  </p>
+                  <p className="mt-1 text-sm text-muted" dir={directionOf(w.meaningLang)}>
+                    {w.definition}
+                  </p>
+                </div>
+                <div className="flex shrink-0 flex-col items-end gap-2">
+                  <span className={`rounded-full border px-2 py-0.5 text-xs ${STATUS_STYLE[status]}`}>
+                    {status === "new" ? t.mywords.statusNew : status === "learning" ? t.mywords.statusLearning : t.mywords.statusKnown}
+                  </span>
+                  <button type="button" onClick={() => forgetPhotoWord(w.id)} className="text-sm text-muted underline">
+                    {t.words.remove}
+                  </button>
+                </div>
+              </div>
+              {w.example && (
+                <p className="mt-2 text-sm text-muted" dir={directionOf(w.learn)}>
+                  “{w.example}”
+                </p>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 

@@ -1,5 +1,6 @@
 import { isUiLanguage, type UiLanguage } from "./i18n";
 import { createLocalStore, parseJson } from "./localStore";
+import { addPhotoWord, isPhotoWords, removePhotoWord, type PhotoWord } from "./photoWords";
 import { logReviewAnswer } from "./stats";
 import { dayKey } from "./progress";
 import { isKnown, schedule, type Grade, type ReviewState } from "./srs";
@@ -49,6 +50,22 @@ export function saveWord(entry: Omit<SavedWord, "savedAt">) {
   savedWordsStore.set([{ ...entry, savedAt: Date.now() }, ...words]);
   recordActivity();
   track("word_saved", { song: entry.songId, phrase: entry.key.includes(" ") });
+}
+
+// Words learned from photos ("Snap & learn"). Reviewed with the same schedule, keyed by their id.
+export const photoWordsStore = createLocalStore<PhotoWord[]>("verso.photoWords", [], (raw) => parseJson(raw, [], isPhotoWords));
+
+export function savePhotoWord(word: Omit<PhotoWord, "id" | "savedAt">) {
+  const words = photoWordsStore.get();
+  const next = addPhotoWord(words, word);
+  if (next === words) return;
+  photoWordsStore.set(next);
+  recordActivity();
+  track("word_saved", { photo: true });
+}
+
+export function forgetPhotoWord(id: string) {
+  photoWordsStore.set(removePhotoWord(photoWordsStore.get(), id));
 }
 
 /** Identifies a word within a song, e.g. "down-to-the-sea:walked". */

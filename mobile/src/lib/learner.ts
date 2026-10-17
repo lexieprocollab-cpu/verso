@@ -4,6 +4,7 @@ import { schedule, type Grade, type ReviewState } from "@shared/lib/srs";
 import type { DayAnswers, DayCounts } from "@shared/lib/statsMath";
 import { TRIAL_SONGS } from "@shared/lib/billing";
 import { getLocales } from "expo-localization";
+import { addPhotoWord, isPhotoWords, removePhotoWord, type PhotoWord } from "@shared/lib/photoWords";
 import { createStore } from "./store";
 
 // The learner's progress and settings on the phone. Same shapes and keys as
@@ -24,6 +25,8 @@ export const reviewsStore = createStore<Record<string, ReviewState>>(
   (v): v is Record<string, ReviewState> => isObject(v) && Object.values(v).every((s) => isObject(s) && typeof s.due === "number"),
 );
 export const knownStore = createStore<string[]>("verso.known", [], isStringArray);
+// Words learned from photos ("Snap & learn"), reviewed with the same schedule under their own id.
+export const photoWordsStore = createStore<PhotoWord[]>("verso.photoWords", [], isPhotoWords);
 export const activityStore = createStore<string[]>("verso.activity", [], isStringArray);
 export const trialStore = createStore<string[]>("verso.trial", [], isStringArray);
 export const mutedStore = createStore<string[]>("verso.rooms.muted", [], isStringArray);
@@ -59,7 +62,7 @@ export function updatePreferences(patch: Partial<Preferences>) {
 
 /** Resolves when every store has read the phone's storage (before deciding on onboarding). */
 export const storesLoaded = Promise.all(
-  [savedWordsStore, reviewsStore, knownStore, activityStore, trialStore, onboardingStore, preferencesStore, listeningStore, reviewLogStore, mutedStore].map((s) => s.loaded),
+  [savedWordsStore, photoWordsStore, reviewsStore, knownStore, activityStore, trialStore, onboardingStore, preferencesStore, listeningStore, reviewLogStore, mutedStore].map((s) => s.loaded),
 ).then(() => undefined);
 
 export const wordId = (songId: string, key: string) => `${songId}:${key}`;
@@ -122,4 +125,16 @@ export function startTrialSong(songId: string): boolean {
   if (songs.length >= TRIAL_SONGS) return false;
   trialStore.set([...songs, songId]);
   return true;
+}
+
+export function savePhotoWord(word: Omit<PhotoWord, "id" | "savedAt">) {
+  const words = photoWordsStore.get();
+  const next = addPhotoWord(words, word);
+  if (next === words) return;
+  photoWordsStore.set(next);
+  recordActivity();
+}
+
+export function forgetPhotoWord(id: string) {
+  photoWordsStore.set(removePhotoWord(photoWordsStore.get(), id));
 }

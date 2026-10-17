@@ -13,6 +13,7 @@ export const EVENT_NAMES = [
   "trial_song_started",
   "paywall_shown",
   "checkout_started",
+  "photo_scanned",
 ] as const;
 export type EventName = (typeof EVENT_NAMES)[number];
 
