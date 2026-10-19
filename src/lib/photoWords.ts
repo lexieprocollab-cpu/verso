@@ -10,6 +10,8 @@ export type PhotoWord = {
   /** Language of `meaning`, `definition` and `exampleMeaning`. */
   meaningLang: UiLanguage;
   reading: string;
+  /** IPA transcription, e.g. "/la tas/" (words saved before it existed have none). */
+  ipa?: string;
   meaning: string;
   definition: string;
   example: string;
@@ -41,6 +43,7 @@ function isPhotoWord(value: unknown): value is PhotoWord {
     isUiLanguage(w.learn) &&
     isUiLanguage(w.meaningLang) &&
     ["reading", "meaning", "definition", "example", "exampleMeaning"].every((k) => typeof w[k] === "string") &&
+    (w.ipa === undefined || typeof w.ipa === "string") &&
     typeof w.savedAt === "number"
   );
 }
@@ -62,4 +65,13 @@ export const PHOTO_MAX_SIDE = 1024;
 export function fitWithin(width: number, height: number, max = PHOTO_MAX_SIDE): { width: number; height: number } {
   const scale = Math.min(1, max / Math.max(width, height));
   return { width: Math.round(width * scale), height: Math.round(height * scale) };
+}
+
+/**
+ * The language a photo item is in: things are named in the language being learned; writing keeps
+ * its own language when Verso supports it, else it counts as the language being learned.
+ */
+export function itemLanguage(item: { kind: "object" | "text"; language: string }, learn: UiLanguage): UiLanguage {
+  const code = item.language.trim().toLowerCase().slice(0, 2);
+  return item.kind === "text" && isUiLanguage(code) ? code : learn;
 }

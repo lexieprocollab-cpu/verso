@@ -117,6 +117,7 @@ function PhotoWordRow({ word, status }: { word: PhotoWord; status: "new" | "lear
         </Pressable>
         <Text style={{ color: status === "known" ? colors.good : colors.muted }}>{label}</Text>
       </View>
+      {word.ipa ? <Text style={{ color: colors.muted }}>{word.ipa}</Text> : null}
       <Text style={{ color: colors.text }}>{word.meaning}</Text>
       <Text style={{ color: colors.muted }}>{word.definition}</Text>
       {word.example ? <Text style={{ color: colors.muted }}>“{word.example}”</Text> : null}

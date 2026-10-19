@@ -124,7 +124,10 @@ describe("photo task", () => {
 
   const image = "A".repeat(400);
   const item = (word: string, x: number, y: number) => ({
+    kind: "object" as const,
     word,
+    language: "fr",
+    ipa: "/la tas/",
     reading: "",
     meaning: "cup",
     definition: "Something you drink from",
@@ -151,6 +154,14 @@ describe("photo task", () => {
     expect(content[0]).toEqual({ type: "image", source: { type: "base64", media_type: "image/jpeg", data: image } });
     expect(content[1].type).toBe("text");
     expect(content[1].text).toContain("French");
+    expect(content[1].text).toContain("writing");
+  });
+
+  it("keeps at most 15 items", async () => {
+    const many = Array.from({ length: 20 }, (_, i) => item(`mot ${i}`, i * 10, i * 10));
+    parse.mockResolvedValueOnce({ stop_reason: "end_turn", parsed_output: { items: many } });
+    const response = await call("photo", { image, mediaType: "image/jpeg", learn: "fr", meaning: "en" });
+    expect((await response.json()).items).toHaveLength(15);
   });
 
   it("does not cache photo answers", async () => {

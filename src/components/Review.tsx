@@ -132,6 +132,11 @@ function PhotoFlashcard({ word, onGrade }: { word: PhotoWord; onGrade: (grade: G
 
       {flipped ? (
         <>
+          {word.ipa && (
+            <p className="mt-4 text-muted" dir="ltr">
+              {word.ipa}
+            </p>
+          )}
           <p className="mt-6 text-2xl" dir={meaningDir}>
             {word.meaning}
           </p>

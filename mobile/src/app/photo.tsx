@@ -1,6 +1,6 @@
 import type { PhotoResult } from "@shared/lib/ai/schemas";
 import { LANGUAGE_NAMES, UI_LANGUAGES, aiFailureText, directionOf, type UiLanguage } from "@shared/lib/i18n";
-import { PHOTO_MAX_SIDE, fitWithin, markerPosition, photoWordId } from "@shared/lib/photoWords";
+import { PHOTO_MAX_SIDE, fitWithin, itemLanguage, markerPosition, photoWordId } from "@shared/lib/photoWords";
 import { SPEECH_LANG } from "@shared/lib/song";
 import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
@@ -30,9 +30,9 @@ async function shrink(asset: ImagePicker.ImagePickerAsset): Promise<Photo & { ba
 }
 
 /**
- * Snap & learn: photograph anything, tap a dot on a thing, learn its word in
- * the language being learned with its meaning, a definition, an example and
- * pronunciation, and save it for review.
+ * Snap & learn: take a photo or choose any picture; the AI names everything in it, things and
+ * writing, with the transcription, meaning, definition and an example. Tap one to hear it and
+ * save it for review.
  */
 export default function PhotoLearn() {
   const { t, colors, speak, lang } = usePreferences();
@@ -103,6 +103,7 @@ export default function PhotoLearn() {
                 hitSlop={10}
                 style={[
                   styles.marker,
+                  it.kind === "text" ? styles.textMarker : null,
                   { left: pos.left as DimensionValue, top: pos.top as DimensionValue, backgroundColor: active ? colors.accent : "rgba(0,0,0,0.6)" },
                 ]}
               >
@@ -123,15 +124,37 @@ export default function PhotoLearn() {
       {state.status === "done" && items.length === 0 ? <Body muted>{t.photo.none}</Body> : null}
       {state.status === "done" && items.length > 0 && !item ? <Body muted>{t.photo.tapHint}</Body> : null}
 
+      {state.status === "done" && item ? <WordPanel item={item} learn={itemLanguage(item, state.learn)} exampleLang={state.learn} meaning={state.meaning} /> : null}
+
       {state.status === "done" && items.length > 0 ? (
-        <View style={styles.chips}>
-          {items.map((it, i) => (
-            <Chip key={`${it.word}-${i}`} label={`${i + 1}. ${it.word}`} active={selected === i} onPress={() => setSelected(i)} />
-          ))}
+        <View style={{ gap: 8 }}>
+          <Body style={{ fontSize: 20, fontWeight: "700" }}>{t.photo.everything}</Body>
+          {items.map((it, i) => {
+            const itemRtl = directionOf(itemLanguage(it, state.learn)) === "rtl";
+            const meaningRtl = directionOf(state.meaning) === "rtl";
+            return (
+              <Pressable
+                key={`${it.word}-${i}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: selected === i }}
+                onPress={() => setSelected(i)}
+                style={[styles.listRow, { borderColor: selected === i ? colors.accent : colors.border, backgroundColor: selected === i ? colors.accentSoft : colors.surface }]}
+              >
+                <Text style={{ color: colors.text, textAlign: itemRtl ? "right" : "left" }}>
+                  <Text style={{ color: colors.muted }}>{i + 1}. </Text>
+                  <Text style={{ fontSize: 18, fontWeight: "700" }}>{it.word}</Text>
+                  {it.ipa ? <Text style={{ color: colors.muted }}>  {it.ipa}</Text> : null}
+                  {it.kind === "text" ? <Text style={{ color: colors.muted }}>  · {t.photo.written}</Text> : null}
+                </Text>
+                <Text style={{ color: colors.text, textAlign: meaningRtl ? "right" : "left" }}>
+                  <Text style={{ fontWeight: "600" }}>{it.meaning}</Text>
+                  <Text style={{ color: colors.muted }}> · {it.definition}</Text>
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
       ) : null}
-
-      {state.status === "done" && item ? <WordPanel item={item} learn={state.learn} meaning={state.meaning} /> : null}
 
       <Body muted style={{ fontSize: 12 }}>
         {t.photo.privacy}
@@ -140,7 +163,8 @@ export default function PhotoLearn() {
   );
 }
 
-function WordPanel({ item, learn, meaning }: { item: Item; learn: UiLanguage; meaning: UiLanguage }) {
+/** `learn` is the word's language; examples are always in the language being learned (`exampleLang`). */
+function WordPanel({ item, learn, exampleLang, meaning }: { item: Item; learn: UiLanguage; exampleLang: UiLanguage; meaning: UiLanguage }) {
   const { t, colors } = usePreferences();
   const saved = photoWordsStore.useValue().some((w) => w.id === photoWordId(learn, item.word));
   const learnAlign = directionOf(learn) === "rtl" ? "right" : "left";
@@ -150,8 +174,9 @@ function WordPanel({ item, learn, meaning }: { item: Item; learn: UiLanguage; me
     <Card>
       <View style={styles.head}>
         <View style={{ flex: 1 }}>
+          {item.kind === "text" ? <Text style={{ color: colors.accent, fontWeight: "700", fontSize: 12 }}>{t.photo.written.toUpperCase()}</Text> : null}
           <Text style={[styles.word, { color: colors.text, textAlign: learnAlign }]}>{item.word}</Text>
-          {item.reading ? <Text style={{ color: colors.muted }}>{item.reading}</Text> : null}
+          {item.ipa || item.reading ? <Text style={{ color: colors.muted }}>{[item.ipa, item.reading].filter(Boolean).join("  ·  ")}</Text> : null}
         </View>
         <Pressable accessibilityRole="button" accessibilityLabel={t.player.listen} onPress={() => Speech.speak(item.word, { language: SPEECH_LANG[learn], rate: 0.8 })}>
           <Text style={[styles.listen, { borderColor: colors.border, color: colors.text }]}>🔊 {t.player.listen}</Text>
@@ -168,8 +193,8 @@ function WordPanel({ item, learn, meaning }: { item: Item; learn: UiLanguage; me
           <Text
             accessibilityRole="button"
             accessibilityLabel={`${t.player.listen}: ${item.example}`}
-            onPress={() => Speech.speak(item.example, { language: SPEECH_LANG[learn], rate: 0.85 })}
-            style={{ color: colors.text, textAlign: learnAlign }}
+            onPress={() => Speech.speak(item.example, { language: SPEECH_LANG[exampleLang], rate: 0.85 })}
+            style={{ color: colors.text, textAlign: directionOf(exampleLang) === "rtl" ? "right" : "left" }}
           >
             🔊 {item.example}
           </Text>
@@ -186,6 +211,7 @@ function WordPanel({ item, learn, meaning }: { item: Item; learn: UiLanguage; me
             learn,
             meaningLang: meaning,
             reading: item.reading,
+            ipa: item.ipa,
             meaning: item.meaning,
             definition: item.definition,
             example: item.example,
@@ -212,9 +238,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  textMarker: { borderRadius: 6 },
   markerText: { color: "#fff", fontWeight: "800" },
+  listRow: { borderWidth: 1, borderRadius: 12, padding: 12, gap: 4 },
   row: { flexDirection: "row", alignItems: "center", gap: 8 },
-  chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   head: { flexDirection: "row", alignItems: "center", gap: 12 },
   word: { fontSize: 30, fontWeight: "800" },
   listen: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6, overflow: "hidden" },

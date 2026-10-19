@@ -107,6 +107,7 @@ function PhotoFlashcard({ word, onGrade }: { word: PhotoWord; onGrade: (grade: G
       {word.example ? <Text style={{ color: colors.muted, textAlign: "center" }}>“{word.example}”</Text> : null}
       {flipped ? (
         <>
+          {word.ipa ? <Text style={{ color: colors.muted }}>{word.ipa}</Text> : null}
           <Text style={[styles.meaning, { color: colors.text }]}>{word.meaning}</Text>
           <Text style={{ color: colors.muted, textAlign: "center" }}>{word.definition}</Text>
           <GradeButtons onGrade={onGrade} />

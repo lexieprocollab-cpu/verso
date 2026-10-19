@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addPhotoWord, fitWithin, isPhotoWords, markerPosition, photoWordId, removePhotoWord } from "./photoWords";
+import { addPhotoWord, fitWithin, isPhotoWords, itemLanguage, markerPosition, photoWordId, removePhotoWord } from "./photoWords";
 
 const cup = {
   word: "la tasse",
@@ -32,6 +32,15 @@ describe("photo words", () => {
     expect(isPhotoWords(words)).toBe(true);
     expect(isPhotoWords([{ ...words[0], learn: "it" }])).toBe(false);
     expect(isPhotoWords("nope")).toBe(false);
+    expect(isPhotoWords([{ ...words[0], ipa: "/la tas/" }])).toBe(true);
+    expect(isPhotoWords([{ ...words[0], ipa: 3 }])).toBe(false);
+  });
+
+  it("reads writing in its own language, things in the language being learned", () => {
+    expect(itemLanguage({ kind: "object", language: "de" }, "fr")).toBe("fr");
+    expect(itemLanguage({ kind: "text", language: "DE" }, "fr")).toBe("de");
+    expect(itemLanguage({ kind: "text", language: "it" }, "fr")).toBe("fr");
+    expect(itemLanguage({ kind: "text", language: "he-IL" }, "en")).toBe("he");
   });
 
   it("places markers inside the photo", () => {

@@ -141,13 +141,24 @@ export const photoRequest = z.object({
   learn: lang,
   meaning: lang,
 });
+/** Most things named in one photo. */
+export const MAX_PHOTO_ITEMS = 15;
+
 export const photoResult = z.object({
   items: z
     .array(
       z.object({
-        word: z.string().describe("The thing's name in the language being learned, as a learner would say it (with the article where natural, e.g. 'la tasse', 'der Tisch')"),
+        kind: z.enum(["object", "text"]).describe("object = a thing you can see; text = writing in the photo (a sign, menu, label, page)"),
+        word: z
+          .string()
+          .describe(
+            "For an object: its name in the language being learned, as a learner would say it (with the article where natural, e.g. 'la tasse', 'der Tisch'). " +
+              "For text: the written word or short phrase exactly as written, in its own language",
+          ),
+        language: z.string().describe("Two-letter ISO 639-1 code of the language `word` is in, e.g. 'fr'"),
+        ipa: z.string().describe("Phonetic transcription of `word` in IPA between slashes, e.g. /la tas/"),
         reading: z.string().describe("Pronunciation help in Latin letters for Hebrew, Arabic, Ukrainian or Russian words; empty otherwise"),
-        meaning: z.string().describe("The word translated into the learner's language"),
+        meaning: z.string().describe("The word or text translated into the learner's language"),
         definition: z.string().describe("One short, simple definition in the learner's language"),
         example: z.string().describe("A short everyday sentence using the word, in the language being learned"),
         example_meaning: z.string().describe("The example sentence translated into the learner's language"),
@@ -155,7 +166,7 @@ export const photoResult = z.object({
         y: z.number().int().describe("Vertical position of the thing's centre: 0 = top edge, 1000 = bottom edge"),
       }),
     )
-    .describe("The clearly visible things worth learning, most prominent first; at most 8"),
+    .describe("Everything clearly visible worth learning: the things, then any writing; most prominent first; at most 15"),
 });
 
 export type WordResult = z.infer<typeof wordResult>;

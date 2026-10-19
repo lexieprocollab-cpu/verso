@@ -168,6 +168,11 @@ function PhotoWordList({ words, known, reviews }: { words: PhotoWord[]; known: s
                   >
                     {w.word} <span className="text-base">🔊</span>
                   </button>
+                  {w.ipa && (
+                    <p className="text-sm text-muted" dir="ltr">
+                      {w.ipa}
+                    </p>
+                  )}
                   <p className="mt-0.5 text-lg" dir={directionOf(w.meaningLang)}>
                     {w.meaning}
                   </p>
